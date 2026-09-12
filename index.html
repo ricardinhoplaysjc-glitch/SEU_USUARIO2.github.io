@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Primeiro Site na Nuvem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f5f7fa;
+            color: #1a1a2e;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #0f3460;
+            border-bottom: 3px solid #e94560;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .badge {
+            display: inline-block;
+            background: #e94560;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+        /* Formulário */
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        button {
+            background: #0f3460;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #e94560;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #0f3460;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Meu Primeiro Site na Nuvem ☁️</h1>
+
+    <p>Esta página foi hospedada com <strong>GitHub Pages</strong> — um serviço de nuvem gratuito.</p>
+
+    <div class="card">
+        <span class="badge">Exercício 1</span>
+        <h2>Sobre mim</h2>
+        <p>Escreva aqui uma breve apresentação. Exemplo: "Sou aluno(a) de automação e este é meu primeiro site publicado na nuvem."</p>
+    </div>
+
+    <div class="card">
+        <span class="badge">Cadastro</span>
+        <h2>Formulário com armazenamento</h2>
+        <p>Os dados ficam salvos no navegador (localStorage) e podem ser exportados como arquivo CSV.</p>
+
+        <form id="formCadastro">
+            <input type="text" id="nome" placeholder="Nome" required>
+            <input type="number" id="idade" placeholder="Idade" min="1" max="120" required>
+            <button type="submit">Salvar</button>
+        </form>
+
+        <button type="button" id="btnVisualizar">Visualizar planilha</button>
+        <button type="button" id="btnBaixar">Baixar CSV</button>
+        <button type="button" id="btnLimpar">Limpar dados</button>
+
+        <div id="tabela"></div>
+    </div>
+
+    <footer>
+        <p>Feito com HTML e CSS — publicado em <strong>github.io</strong></p>
+        <p>Data: <span id="data"></span></p>
+    </footer>
+
+    <script>
+        // ===== Cadastro com localStorage + exportação CSV =====
+        const CHAVE = "alunos";
+        let alunos = JSON.parse(localStorage.getItem(CHAVE) || "[]");
+
+        function salvar() {
+            localStorage.setItem(CHAVE, JSON.stringify(alunos));
+        }
+
+        function renderizar() {
+            const div = document.getElementById("tabela");
+            if (alunos.length === 0) {
+                div.innerHTML = "<p>Nenhum registro salvo ainda.</p>";
+                return;
+            }
+            let html = "<table><thead><tr><th>#</th><th>Nome</th><th>Idade</th></tr></thead><tbody>";
+            alunos.forEach((a, i) => {
+                html += `<tr><td>${i + 1}</td><td>${a.nome}</td><td>${a.idade}</td></tr>`;
+            });
+            html += "</tbody></table>";
+            div.innerHTML = html;
+        }
+
+        document.getElementById("formCadastro").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome").value.trim();
+            const idade = document.getElementById("idade").value;
+            if (!nome || !idade) return;
+            alunos.push({ nome, idade });
+            salvar();
+            renderizar();
+            e.target.reset();
+        });
+
+        document.getElementById("btnVisualizar").addEventListener("click", renderizar);
+
+        document.getElementById("btnBaixar").addEventListener("click", () => {
+            const BOM = "\uFEFF"; // faz o Excel reconhecer UTF-8 (acentos)
+            const linhas = ["nome;idade"];
+            alunos.forEach((a) => linhas.push(`${a.nome};${a.idade}`));
+            const blob = new Blob([BOM + linhas.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "alunos.csv";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById("btnLimpar").addEventListener("click", () => {
+            if (confirm("Apagar todos os registros?")) {
+                alunos = [];
+                salvar();
+                renderizar();
+            }
+        });
+
+        document.getElementById("data").textContent =
+            new Date().toLocaleDateString("pt-BR");
+        renderizar();
+    </script>
+
+</body>
+</html>
